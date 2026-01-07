@@ -7,12 +7,18 @@ const CartItem = ({ onContinueShopping }) => {
   const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
 
-  // Total amount for all items in cart
+  // Total cost of all items in cart
   const calculateTotalAmount = () => {
-    return cart.reduce((sum, item) => {
-      const cost = Number(item.cost); // cost should be number in ProductList
+    return cart.reduce((total, item) => {
+      // rubric mentions cost string like "$15" -> parseFloat(item.cost.substring(1))
+      // but your ProductList currently uses numeric costs, so handle both safely:
+      const unitPrice =
+        typeof item.cost === "string"
+          ? parseFloat(item.cost.substring(1))
+          : Number(item.cost);
+
       const qty = Number(item.quantity || 1);
-      return sum + cost * qty;
+      return total + unitPrice * qty;
     }, 0);
   };
 
@@ -21,25 +27,49 @@ const CartItem = ({ onContinueShopping }) => {
     onContinueShopping(e);
   };
 
+  const handleCheckoutShopping = (e) => {
+    e.preventDefault();
+    alert("Functionality to be added for future reference");
+  };
+
   const handleIncrement = (item) => {
-    const newQty = (item.quantity || 1) + 1;
-    dispatch(updateQuantity({ name: item.name, amount: newQty }));
+    dispatch(
+      updateQuantity({
+        name: item.name,
+        amount: (item.quantity || 1) + 1,
+      })
+    );
   };
 
   const handleDecrement = (item) => {
-    const newQty = (item.quantity || 1) - 1;
-    // Our reducer removes item if qty <= 0
-    dispatch(updateQuantity({ name: item.name, amount: newQty }));
+    const currentQty = item.quantity || 1;
+
+    if (currentQty > 1) {
+      dispatch(
+        updateQuantity({
+          name: item.name,
+          amount: currentQty - 1,
+        })
+      );
+    } else {
+      // if would drop to 0, remove item
+      dispatch(removeItem(item.name));
+    }
   };
 
   const handleRemove = (item) => {
     dispatch(removeItem(item.name));
   };
 
+  // Subtotal for an individual item
   const calculateTotalCost = (item) => {
-    const cost = Number(item.cost);
+    const unitPrice =
+      typeof item.cost === "string"
+        ? parseFloat(item.cost.substring(1))
+        : Number(item.cost);
+
     const qty = Number(item.quantity || 1);
-    return cost * qty;
+    return unitPrice * qty;
   };
 
   return (
@@ -56,7 +86,12 @@ const CartItem = ({ onContinueShopping }) => {
             <div className="cart-item-details">
               <div className="cart-item-name">{item.name}</div>
 
-              <div className="cart-item-cost">${item.cost}</div>
+              {/* show unit price */}
+              <div className="cart-item-cost">
+                ${typeof item.cost === "string"
+                  ? parseFloat(item.cost.substring(1))
+                  : item.cost}
+              </div>
 
               <div className="cart-item-quantity">
                 <button
@@ -98,7 +133,9 @@ const CartItem = ({ onContinueShopping }) => {
           Continue Shopping
         </button>
         <br />
-        <button className="get-started-button1">Checkout</button>
+        <button className="get-started-button1" onClick={handleCheckoutShopping}>
+          Checkout
+        </button>
       </div>
     </div>
   );

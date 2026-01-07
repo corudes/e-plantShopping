@@ -21,12 +21,14 @@ body {
     font-size: 20px;
 }
 
+/* Center the Plants link in the navbar */
 .navbar .ul {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;   /* centers Plants + cart */
     align-items: center;
-    width: 1100px;
+    gap: 40px;                 /* space between Plants and cart icon */
 }
+
 
 .navbar li {
     margin-right: 30px;

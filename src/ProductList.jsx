@@ -80,6 +80,13 @@ function ProductList({ onHomeClick }) {
     },
   ];
 
+  // REQUIRED BY TASK 4: total quantity in cart icon
+  const calculateTotalQuantity = () => {
+    return cartItems
+      ? cartItems.reduce((total, item) => total + (item.quantity || 1), 0)
+      : 0;
+  };
+
   // Add to cart (Redux handles quantity + duplicates)
   const handleAddToCart = (plant) => {
     dispatch(addItem(plant));
@@ -136,7 +143,7 @@ function ProductList({ onHomeClick }) {
 
           <div>
             <a href="#" onClick={handleCartClick}>
-              <h1 className="cart">
+              <h1 className="cart" style={{ position: "relative" }}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 256 256"
@@ -154,6 +161,11 @@ function ProductList({ onHomeClick }) {
                     strokeWidth="2"
                   />
                 </svg>
+
+                {/* Quantity badge */}
+                <div className="cart_quantity_count">
+                  {calculateTotalQuantity()}
+                </div>
               </h1>
             </a>
           </div>

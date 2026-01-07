@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import "./ProductList.css";
 import CartItem from "./CartItem";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addItem } from "./CartSlice";
 
 function ProductList({ onHomeClick }) {
   const dispatch = useDispatch();
 
+  // Read cart items from Redux
+  const cartItems = useSelector((state) => state.cart.items);
+
   const [showCart, setShowCart] = useState(false);
   const [showPlants, setShowPlants] = useState(true);
-
-  // REQUIRED BY TASK
-  const [addedToCart, setAddedToCart] = useState({});
 
   const plantsArray = [
     {
@@ -80,13 +80,9 @@ function ProductList({ onHomeClick }) {
     },
   ];
 
-  // REQUIRED FUNCTION
+  // Add to cart (Redux handles quantity + duplicates)
   const handleAddToCart = (plant) => {
     dispatch(addItem(plant));
-    setAddedToCart((prev) => ({
-      ...prev,
-      [plant.name]: true,
-    }));
   };
 
   const handleHomeClick = (e) => {
@@ -176,35 +172,37 @@ function ProductList({ onHomeClick }) {
                   <h2 className="plant_heading">{category.category}</h2>
                 </div>
 
-                {/* IMPORTANT: product-list matches your CSS */}
                 <div className="product-list">
-                  {category.plants.map((plant) => (
-                    <div className="product-card" key={plant.name}>
-                      <h3 className="product-title">{plant.name}</h3>
+                  {category.plants.map((plant) => {
+                    const isInCart = cartItems.some(
+                      (item) => item.name === plant.name
+                    );
 
-                      {/* IMPORTANT: product-image class fixes giant images */}
-                      <img
-                        className="product-image"
-                        src={plant.image}
-                        alt={plant.name}
-                      />
+                    return (
+                      <div className="product-card" key={plant.name}>
+                        <h3 className="product-title">{plant.name}</h3>
 
-                      <p>{plant.description}</p>
-                      <p className="product-price">${plant.cost}</p>
+                        <img
+                          className="product-image"
+                          src={plant.image}
+                          alt={plant.name}
+                        />
 
-                      <button
-                        className={`product-button ${
-                          addedToCart[plant.name] ? "added-to-cart" : ""
-                        }`}
-                        onClick={() => handleAddToCart(plant)}
-                        disabled={addedToCart[plant.name]}
-                      >
-                        {addedToCart[plant.name]
-                          ? "Added to Cart"
-                          : "Add to Cart"}
-                      </button>
-                    </div>
-                  ))}
+                        <p>{plant.description}</p>
+                        <p className="product-price">${plant.cost}</p>
+
+                        <button
+                          className={`product-button ${
+                            isInCart ? "added-to-cart" : ""
+                          }`}
+                          onClick={() => handleAddToCart(plant)}
+                          disabled={isInCart}
+                        >
+                          {isInCart ? "Added to Cart" : "Add to Cart"}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}
